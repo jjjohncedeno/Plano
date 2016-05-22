@@ -28,7 +28,7 @@ function init() {
 
         cameraControls = new THREE.TrackballControls(camera, renderer.domElement);
         cameraControls.target.set(0, 0, 0);
-
+        cameraControls.rotateSpeed = .02
         scene = new THREE.Scene();
 
 
@@ -39,7 +39,8 @@ function init() {
         addToScene(drawPlane(100,100));
         addToScene(drawCube(10));
         addToScene(drawSphere(5));
-
+        addToScene(drawToro(5,1));
+        addToScene(drawOct(5));
 
         window.addEventListener( 'resize', onWindowResize, false );
 
@@ -82,9 +83,29 @@ function drawCube(dimension){
 
 function drawSphere(radius) {
     var sphere_geometry = new THREE.SphereGeometry(radius);
-    var material = new THREE.MeshPhongMaterial({color:0xaa55aa,side:THREE.DoubleSide});
+    var material = new THREE.MeshPhongMaterial({color:0xea350e,side:THREE.DoubleSide});
     var mesh = new THREE.Mesh(sphere_geometry,material);
     mesh.position.set(-20,0,30);
+    mesh.castShadow = true;
+    return mesh;
+
+}
+
+function drawToro(rmenor, rmayor) {
+    var toro_geometry = new THREE.TorusGeometry(rmenor, rmayor, 16, 100);
+    var material = new THREE.MeshPhongMaterial({color:0xaa55aa,side:THREE.DoubleSide});
+    var mesh = new THREE.Mesh(toro_geometry,material);
+    mesh.position.set(20,0,30);
+    mesh.castShadow = true;
+    return mesh;
+
+}
+
+function drawOct(radius) {
+    var oct_geometry = new THREE.OctahedronGeometry(radius, 0);
+    var material = new THREE.MeshPhongMaterial({color:0x08cd02,side:THREE.DoubleSide});
+    var mesh = new THREE.Mesh(oct_geometry,material);
+    mesh.position.set(0,30,20);
     mesh.castShadow = true;
     return mesh;
 
