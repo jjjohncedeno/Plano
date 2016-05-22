@@ -17,6 +17,8 @@ function init() {
 
         renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMapEnabled = true;
+        renderer.shadowMapType = THREE.PCFShadowMap;
 
         container = document.getElementById('container');
         container.appendChild(renderer.domElement);
@@ -29,51 +31,67 @@ function init() {
 
         scene = new THREE.Scene();
 
-        material = new THREE.MeshBasicMaterial({
-            color: 'black'
-        });
+
 
         group = new THREE.Object3D();
-        var geometriaCubo = new THREE.CubeGeometry(
-            100, // Dimensiones en eje X
-            1, // Dimensiones en eje Y
-            100 // Dimensiones en eje Z
-        );
 
-        //load mesh
-        modelLoadedCallback(geometriaCubo, material)
+        addToScene(initSpotLight());
+        addToScene(drawPlane(100,100));
+        addToScene(drawCube(10));
+        addToScene(drawSphere(5));
+
 
         window.addEventListener( 'resize', onWindowResize, false );
 
 }
 
+function initSpotLight() {
+    var spotLight = new THREE.SpotLight( 0xffffff );
+    spotLight.position.set( 0, 0, 100 );
 
-function drawSquare(x1, y1, x2, y2) {
-
-  var square = new THREE.Geometry();
-
-  //set 4 points
-  square.vertices.push( new THREE.Vector3( x1,y2,0) );
-  square.vertices.push( new THREE.Vector3( x1,y1,0) );
-  square.vertices.push( new THREE.Vector3( x2,y1,0) );
-  square.vertices.push( new THREE.Vector3( x2,y2,0) );
-
-  //push 1 triangle
-  square.faces.push( new THREE.Face3( 0,1,2) );
-
-  //push another triangle
-  square.faces.push( new THREE.Face3( 0,3,2) );
-
-  //return the square object with BOTH faces
-  return square;
+    spotLight.castShadow = true;
+    spotLight.angle=(Math.PI)/3;
+    //
+    // spotLight.shadow.mapSize.width = 1024;
+    // spotLight.shadow.mapSize.height = 1024;
+    //
+    // spotLight.shadow.camera.near = 500;
+    // spotLight.shadow.camera.far = 4000;
+    // spotLight.shadow.camera.fov = 30;
+    return spotLight;
 }
 
-function modelLoadedCallback(geometry, material) {
+function drawPlane(width,height){
+    var plane_geometry = new THREE.PlaneGeometry(width,height);
+    var material = new THREE.MeshPhongMaterial({color:0x255f00,side:THREE.DoubleSide});
+    var mesh = new THREE.Mesh(plane_geometry,material);
+    mesh.receiveShadow = true;
+    return mesh;
+}
 
-        mesh = new THREE.Mesh( geometry, material );
-        group.add(mesh);
-        scene.add( group );
+function drawCube(dimension){
+    var cube_geometry = new THREE.BoxGeometry(dimension,dimension,dimension);
+    var material = new THREE.MeshPhongMaterial({color:0x55aaaa,side:THREE.DoubleSide});
+    var mesh = new THREE.Mesh(cube_geometry,material);
+    mesh.position.set(-40,-40,10);
+    mesh.castShadow = true;
+    return mesh;
 
+}
+
+function drawSphere(radius) {
+    var sphere_geometry = new THREE.SphereGeometry(radius);
+    var material = new THREE.MeshPhongMaterial({color:0x55aaaa,side:THREE.DoubleSide});
+    var mesh = new THREE.Mesh(sphere_geometry,material);
+    mesh.position.set(-0,0,30);
+    mesh.castShadow = true;
+    return mesh;
+
+}
+
+
+function addToScene(geom){
+    scene.add(geom);
 }
 
 function onWindowResize() {
