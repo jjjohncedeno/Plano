@@ -2,7 +2,7 @@ if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
 var container;
 
-var camera, cameraControls, scene, renderer, mesh;
+var camera, cameraControls, scene, renderer;
 var group;
 
 var clock = new THREE.Clock();
@@ -51,13 +51,14 @@ function initSpotLight() {
 
     spotLight.castShadow = true;
     spotLight.angle=(Math.PI)/3;
+
     //
-    // spotLight.shadow.mapSize.width = 1024;
-    // spotLight.shadow.mapSize.height = 1024;
+    spotLight.shadow.mapSize.width = 1024;
+    spotLight.shadow.mapSize.height = 1024;
     //
     // spotLight.shadow.camera.near = 500;
     // spotLight.shadow.camera.far = 4000;
-    // spotLight.shadow.camera.fov = 30;
+    spotLight.shadow.camera.fov = 10;
     return spotLight;
 }
 
@@ -73,7 +74,7 @@ function drawCube(dimension){
     var cube_geometry = new THREE.BoxGeometry(dimension,dimension,dimension);
     var material = new THREE.MeshPhongMaterial({color:0x55aaaa,side:THREE.DoubleSide});
     var mesh = new THREE.Mesh(cube_geometry,material);
-    mesh.position.set(-40,-40,10);
+    mesh.position.set(-0,-30,10);
     mesh.castShadow = true;
     return mesh;
 
@@ -81,9 +82,9 @@ function drawCube(dimension){
 
 function drawSphere(radius) {
     var sphere_geometry = new THREE.SphereGeometry(radius);
-    var material = new THREE.MeshPhongMaterial({color:0x55aaaa,side:THREE.DoubleSide});
+    var material = new THREE.MeshPhongMaterial({color:0xaa55aa,side:THREE.DoubleSide});
     var mesh = new THREE.Mesh(sphere_geometry,material);
-    mesh.position.set(-0,0,30);
+    mesh.position.set(-20,0,30);
     mesh.castShadow = true;
     return mesh;
 
