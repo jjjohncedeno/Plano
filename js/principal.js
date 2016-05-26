@@ -95,7 +95,7 @@ function drawToro(rmenor, rmayor) {
     var toro_geometry = new THREE.TorusGeometry(rmenor, rmayor, 16, 100);
     var material = new THREE.MeshPhongMaterial({color:0xaa55aa,side:THREE.DoubleSide});
     var mesh = new THREE.Mesh(toro_geometry,material);
-    mesh.position.set(20,0,30);
+    mesh.position.set(20,0,40);
     mesh.castShadow = true;
     return mesh;
 
@@ -105,7 +105,7 @@ function drawOct(radius) {
     var oct_geometry = new THREE.OctahedronGeometry(radius, 0);
     var material = new THREE.MeshPhongMaterial({color:0x08cd02,side:THREE.DoubleSide});
     var mesh = new THREE.Mesh(oct_geometry,material);
-    mesh.position.set(0,30,20);
+    mesh.position.set(0,20,50);
     mesh.castShadow = true;
     return mesh;
 
