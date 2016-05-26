@@ -6,6 +6,8 @@ var camera, cameraControls, scene, renderer;
 var group;
 
 var clock = new THREE.Clock();
+var cube=null;
+var toroide=null;
 
 init();
 animate();
@@ -39,26 +41,30 @@ function init() {
         plane_figure.visible = false;
 
         plane_figure = drawPlane(100,100,0);
+        cube = drawCube(10);
+    toroide=drawToro(5,1);
 
-        addToScene(initSpotLight());
+
+        addToScene(initLight(20,20));
+        addToScene(initLight(-20,-20));
         addToScene(plane_figure);
         addToScene(drawPlane(100,100,1));
-        addToScene(drawCube(10));
+        addToScene(cube);
         addToScene(drawSphere(5));
-        addToScene(drawToro(5,1));
+        addToScene(toroide);
         addToScene(drawOct(5));
         addMenu();
-
+    rotate(cube);
         window.addEventListener( 'resize', onWindowResize, false );
 
 }
 
-function initSpotLight() {
-    var spotLight = new THREE.SpotLight( 0xffffff );
-    spotLight.position.set( 0, 0, 100 );
+function initLight(x,y) {
+    var spotLight = new THREE.PointLight( 0xffffff );
+    spotLight.position.set( x, y, 100 );
 
     spotLight.castShadow = true;
-    spotLight.angle=(Math.PI)/3;
+    //spotLight.angle=(Math.PI)/3;
 
     //
     spotLight.shadow.mapSize.width = 1024;
@@ -66,7 +72,7 @@ function initSpotLight() {
     //
     // spotLight.shadow.camera.near = 500;
     // spotLight.shadow.camera.far = 4000;
-    spotLight.shadow.camera.fov = 10;
+    //spotLight.shadow.camera.fov = 10;
     return spotLight;
 }
 
@@ -161,6 +167,15 @@ function addToScene(geom){
     scene.add(geom);
 }
 
+function rotate(obj,eje,velocidad){
+    if(eje=='z')
+        obj.rotateZ(velocidad);
+    if(eje=='x')
+        obj.rotateX(velocidad);
+    if(eje=='y')
+        obj.rotateY(velocidad);
+}
+
 function onWindowResize() {
 
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -175,7 +190,8 @@ function onWindowResize() {
 function animate() {
 
         var delta = clock.getDelta();
-
+        rotate(cube,'z',0.01);
+    rotate(toroide,'x',0.02);
         requestAnimationFrame(animate);
 
         cameraControls.update(delta);
