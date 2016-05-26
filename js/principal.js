@@ -30,11 +30,7 @@ function init() {
         cameraControls.target.set(0, 0, 0);
         cameraControls.rotateSpeed = .02
         scene = new THREE.Scene();
-
-
-
-        group = new THREE.Object3D();
-
+    
         addToScene(initSpotLight());
         addToScene(drawPlane(100,100));
         addToScene(drawCube(10));
@@ -47,18 +43,18 @@ function init() {
 }
 
 function initSpotLight() {
+    //creamos un objeto de luz blanca
     var spotLight = new THREE.SpotLight( 0xffffff );
+    //seteamos su posision a una distancia de 100 en ele eje z
     spotLight.position.set( 0, 0, 100 );
-
+    //habilitamos la luz para que cree sombras
     spotLight.castShadow = true;
+    //añadimos el angulo de incidencia de la luz, en este caso
+    //sera de 60 grados
     spotLight.angle=(Math.PI)/3;
-
-    //
+    //aumentamos la calidad de la proyeccion de las sombras
     spotLight.shadow.mapSize.width = 1024;
     spotLight.shadow.mapSize.height = 1024;
-    //
-    // spotLight.shadow.camera.near = 500;
-    // spotLight.shadow.camera.far = 4000;
     spotLight.shadow.camera.fov = 10;
     return spotLight;
 }
