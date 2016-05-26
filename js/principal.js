@@ -35,12 +35,19 @@ function init() {
 
         group = new THREE.Object3D();
 
+        plane_figure = new THREE.Group();
+        plane_figure.visible = false;
+
+        plane_figure = drawPlane(100,100,0);
+
         addToScene(initSpotLight());
-        addToScene(drawPlane(100,100));
+        addToScene(plane_figure);
+        addToScene(drawPlane(100,100,1));
         addToScene(drawCube(10));
         addToScene(drawSphere(5));
         addToScene(drawToro(5,1));
         addToScene(drawOct(5));
+        addMenu();
 
         window.addEventListener( 'resize', onWindowResize, false );
 
@@ -63,10 +70,20 @@ function initSpotLight() {
     return spotLight;
 }
 
-function drawPlane(width,height){
+function drawPlane(width,height,face){
+    var texture = new THREE.TextureLoader().load( "img/tablero.png" );
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+
+    var materials = [new THREE.MeshPhongMaterial({map: texture, side: THREE.FrontSide}),
+                 new THREE.MeshPhongMaterial({color: 0x255f00, side: THREE.BackSide})];
+
     var plane_geometry = new THREE.PlaneGeometry(width,height);
-    var material = new THREE.MeshPhongMaterial({color:0x255f00,side:THREE.DoubleSide});
-    var mesh = new THREE.Mesh(plane_geometry,material);
+    //var material = new THREE.MeshPhongMaterial({color:0x255f00,side:THREE.DoubleSide});
+
+
+    var mesh = new THREE.Mesh(plane_geometry,materials[face]);
+    //var object = THREE.SceneUtils.createMultiMaterialObject( plane_geometry, materials );
     mesh.receiveShadow = true;
     return mesh;
 }
@@ -109,6 +126,34 @@ function drawOct(radius) {
     mesh.castShadow = true;
     return mesh;
 
+}
+
+function addMenu(){
+    var color = new THREE.Color( 0x255f00 );
+    var c_white = new THREE.Color( 0xffffff );
+    var texture = new THREE.TextureLoader().load( "img/tablero.png" );
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    var gui = new dat.GUI(),
+        folder = gui.addFolder( "Opciones:" ),
+        props = {
+            get 'Tablero'() { return renderer.localClippingEnabled; },
+            set 'Tablero'( v ) {
+                    console.log(plane_figure.material);
+                    renderer.localClippingEnabled = v;
+                    if ( v ) {
+                        plane_figure.material.map = texture;
+                        plane_figure.material.color = c_white;
+                    }
+                    else {
+                        plane_figure.material.color = color;
+                        plane_figure.material.map = null;
+                    };
+                },
+            
+        };
+    folder.add( props, 'Tablero' );
+    
 }
 
 
