@@ -8,6 +8,11 @@ var group;
 var clock = new THREE.Clock();
 var cube=null;
 var toroide=null;
+var sphere=null;
+var octaedro=null;
+var cubeV, sphereV, octaedroV, toroV;
+var objetoSelect, objetoParametros;
+var gui;
 
 init();
 animate();
@@ -26,6 +31,7 @@ function init() {
         container.appendChild(renderer.domElement);
 
         camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000 );
+        document.addEventListener( 'click', clickObject, false );
         camera.position.z = 100;
 
         cameraControls = new THREE.TrackballControls(camera, renderer.domElement);
@@ -33,30 +39,48 @@ function init() {
         cameraControls.rotateSpeed = .02
         scene = new THREE.Scene();
 
-
-
         group = new THREE.Object3D();
 
         plane_figure = new THREE.Group();
         plane_figure.visible = false;
 
         plane_figure = drawPlane(100,100,0);
-        cube = drawCube(10);
-    toroide=drawToro(5,1);
 
+        cubeParams = param( -0,-30,10,"#470e98", 0, 0, 0);
+        cube = drawCube(10);
+        cubeV = new Velocity(0,0,0);
+
+        toroParams = param( -0,-30,10,"#c600e1", 0, 0, 0);
+        toroide=drawToro(5,1);
+        toroV = new Velocity(0,0,0);
+
+        sphereParams = param( -0,-30,10,"#e10034", 0, 0, 0);
+        sphere=drawSphere(5);
+        sphereV = new Velocity(0,0,0);
+
+        octaedroParams = param( -0,-30,10,"#00e14f", 0, 0, 0);
+        octaedro=drawOct(5);
+        octaedroV = new Velocity(0,0,0);
 
         addToScene(initLight(20,20));
         addToScene(initLight(-20,-20));
         addToScene(plane_figure);
         addToScene(drawPlane(100,100,1));
         addToScene(cube);
-        addToScene(drawSphere(5));
+        addToScene(sphere);
         addToScene(toroide);
-        addToScene(drawOct(5));
+        addToScene(octaedro);
+        objetoSelect=cube;
+        objetoParametros=cubeParams;
         addMenu();
-    rotate(cube);
         window.addEventListener( 'resize', onWindowResize, false );
 
+}
+
+function Velocity(x,y,z){
+  this.vx=x;
+  this.vy=y;
+  this.vz=z;
 }
 
 function initLight(x,y) {
@@ -94,9 +118,9 @@ function drawPlane(width,height,face){
     return mesh;
 }
 
-function drawCube(dimension){
+function drawCube(dimension, params){
     var cube_geometry = new THREE.BoxGeometry(dimension,dimension,dimension);
-    var material = new THREE.MeshPhongMaterial({color:0x55aaaa,side:THREE.DoubleSide});
+    var material = new THREE.MeshPhongMaterial({color:"#470e98",side:THREE.DoubleSide});
     var mesh = new THREE.Mesh(cube_geometry,material);
     mesh.position.set(-0,-30,10);
     mesh.castShadow = true;
@@ -106,7 +130,7 @@ function drawCube(dimension){
 
 function drawSphere(radius) {
     var sphere_geometry = new THREE.SphereGeometry(radius);
-    var material = new THREE.MeshPhongMaterial({color:0xea350e,side:THREE.DoubleSide});
+    var material = new THREE.MeshPhongMaterial({color:"#e10034",side:THREE.DoubleSide});
     var mesh = new THREE.Mesh(sphere_geometry,material);
     mesh.position.set(-20,0,30);
     mesh.castShadow = true;
@@ -116,7 +140,7 @@ function drawSphere(radius) {
 
 function drawToro(rmenor, rmayor) {
     var toro_geometry = new THREE.TorusGeometry(rmenor, rmayor, 16, 100);
-    var material = new THREE.MeshPhongMaterial({color:0xaa55aa,side:THREE.DoubleSide});
+    var material = new THREE.MeshPhongMaterial({color:"#c600e1",side:THREE.DoubleSide});
     var mesh = new THREE.Mesh(toro_geometry,material);
     mesh.position.set(20,0,40);
     mesh.castShadow = true;
@@ -126,7 +150,7 @@ function drawToro(rmenor, rmayor) {
 
 function drawOct(radius) {
     var oct_geometry = new THREE.OctahedronGeometry(radius, 0);
-    var material = new THREE.MeshPhongMaterial({color:0x08cd02,side:THREE.DoubleSide});
+    var material = new THREE.MeshPhongMaterial({color:"#00e14f",side:THREE.DoubleSide});
     var mesh = new THREE.Mesh(oct_geometry,material);
     mesh.position.set(0,20,50);
     mesh.castShadow = true;
@@ -140,40 +164,98 @@ function addMenu(){
     var texture = new THREE.TextureLoader().load( "img/tablero.png" );
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    var gui = new dat.GUI(),
-        folder = gui.addFolder( "Opciones:" ),
-        props = {
-            get 'Tablero'() { return renderer.localClippingEnabled; },
-            set 'Tablero'( v ) {
-                    console.log(plane_figure.material);
-                    renderer.localClippingEnabled = v;
-                    if ( v ) {
-                        plane_figure.material.map = texture;
-                        plane_figure.material.color = c_white;
-                    }
-                    else {
-                        plane_figure.material.color = color;
-                        plane_figure.material.map = null;
-                    };
-                },
-            
-        };
+    gui = new dat.GUI(),
+    folder = gui.addFolder( "Opciones:" ),
+    props = {
+        get 'Tablero'() { return renderer.localClippingEnabled; },
+        set 'Tablero'( v ) {
+                console.log(plane_figure.material);
+                renderer.localClippingEnabled = v;
+                if ( v ) {
+                    plane_figure.material.map = texture;
+                    plane_figure.material.color = c_white;
+                }
+                else {
+                    plane_figure.material.color = color;
+                    plane_figure.material.map = null;
+                };
+            },
+
+    };
     folder.add( props, 'Tablero' );
-    
+
+    addMenuFigura(cube, "Cubo", cubeParams, cubeV);
+    addMenuFigura(toroide, "Toroide", toroParams,toroV);
+    addMenuFigura(sphere, "Esfera", sphereParams,sphereV);
+    addMenuFigura(octaedro, "Octaedro", octaedroParams,octaedroV);
 }
+
+
+function param(posx,posy,posz,colores, velx, vely, velz){
+  parameters =
+  {
+    PosicionX: posx, PosicionY: posy, PosicionZ: posz,
+    color: colores, // color (change "#" to "0x")
+    VelocidadX: velx, VelocidadY: vely, VelocidadZ: velz,
+  };
+  return parameters;
+}
+
+function addMenuFigura(obj, nombre, param, vel){
+  /*folder = gui.addFolder( "Figura Geometrica: " + nombre ),
+
+  props = {
+      get 'Velocidad'() { return renderer.localClippingEnabled; },
+      set 'Velocidad'( v ) {
+              renderer.localClippingEnabled = v;
+              if ( v ) {
+                  plane_figure.material.map = texture;
+                  plane_figure.material.color = c_white;
+              }
+              else {
+                  plane_figure.material.color = color;
+                  plane_figure.material.map = null;
+              };
+          },
+
+  };
+  folder.add( props, 'Velocidad' );*/
+  obj = obj;
+  parameters = param;
+  var folder1 = gui.addFolder(nombre);
+	var objX = folder1.add( parameters, 'PosicionX' ).min(-38).max(38).step(1).listen();
+	var objY = folder1.add( parameters, 'PosicionY' ).min(-38).max(38).step(1).listen();
+	var objZ = folder1.add( parameters, 'PosicionZ' ).min(-0).max(40).step(1).listen();
+
+	objX.onChange(function(value) 	{   obj.position.x = value;   });
+	objY.onChange(function(value)  {   obj.position.y = value;   });
+	objZ.onChange(function(value) 	{   obj.position.z = value;   });
+
+  var velX = folder1.add( parameters, 'VelocidadX' ).min(0).max(1).step(0.01).listen();
+  var velY = folder1.add( parameters, 'VelocidadY' ).min(0).max(1).step(0.01).listen();
+  var velZ = folder1.add( parameters, 'VelocidadZ' ).min(0).max(1).step(0.01).listen();
+
+  velX.onChange(function(value) 	{   vel.vx=value;   });
+	velY.onChange(function(value)  {   vel.vy=value; });
+	velZ.onChange(function(value) 	{   vel.vz=value;  });
+
+  var objColor = gui.addColor( parameters, 'color' ).name('Color').listen();
+	objColor.onChange(function(value) // onFinishChange
+	{   obj.material.color.setHex( value.replace("#", "0x") );   });
+
+}
+
 
 
 function addToScene(geom){
     scene.add(geom);
 }
 
-function rotate(obj,eje,velocidad){
-    if(eje=='z')
-        obj.rotateZ(velocidad);
-    if(eje=='x')
-        obj.rotateX(velocidad);
-    if(eje=='y')
-        obj.rotateY(velocidad);
+function rotate(obj,velx, vely, velz){
+
+    obj.rotateZ(velz);
+    obj.rotateX(velx);
+    obj.rotateY(vely);
 }
 
 function onWindowResize() {
@@ -187,15 +269,33 @@ function onWindowResize() {
 
 }
 
+function clickObject( e ) {
+
+  var vector = new THREE.Vector3(( e.clientX / window.innerWidth ) * 2 - 1, -( e.clientY / window.innerHeight ) * 2 + 1, 0.5);
+  vector = vector.unproject(camera);
+  var raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
+  var intersects = raycaster.intersectObjects([toroide, cube]);
+  if (intersects.length > 0) {
+    console.log(intersects[0]);
+    //intersects[0].object.material.transparent = true;
+    //intersects[0].object.material.opacity = 0.1;
+    objetoSelect = intersects[0].object;
+
+  }
+}
+
 function animate() {
 
-        var delta = clock.getDelta();
-        rotate(cube,'z',0.01);
-    rotate(toroide,'x',0.02);
-        requestAnimationFrame(animate);
+    var delta = clock.getDelta();
+    rotate(cube,cubeV.vx, cubeV.vy, cubeV.vz)
+    rotate(toroide,toroV.vx, toroV.vy, toroV.vz)
+    rotate(sphere,sphereV.vx, sphereV.vy, sphereV.vz)
+    rotate(octaedro,octaedroV.vx, octaedroV.vy, octaedroV.vz)
 
-        cameraControls.update(delta);
+    requestAnimationFrame(animate);
 
-        renderer.render(scene, camera);
+    cameraControls.update(delta);
+
+    renderer.render(scene, camera);
 
 }
