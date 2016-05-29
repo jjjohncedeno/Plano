@@ -13,6 +13,14 @@ var octaedro=null;
 var cubeV, sphereV, octaedroV, toroV;
 var objetoSelect, objetoParametros;
 var gui;
+var luz1, luz2;
+
+var tableroParam = {
+  Tablero : true,
+  Sombra : true,
+  Luz1: true,
+  Luz2: true,
+}
 
 init();
 animate();
@@ -62,16 +70,17 @@ function init() {
         octaedro=drawOct(5);
         octaedroV = new Velocity(0,0,0);
 
+        luz1=initLight(20,20);
         addToScene(initLight(20,20));
         addToScene(initLight(-20,-20));
+        luz1.visible=false;
         addToScene(plane_figure);
         addToScene(drawPlane(100,100,1));
         addToScene(cube);
         addToScene(sphere);
         addToScene(toroide);
         addToScene(octaedro);
-        objetoSelect=cube;
-        objetoParametros=cubeParams;
+
         addMenu();
         window.addEventListener( 'resize', onWindowResize, false );
 
@@ -86,14 +95,10 @@ function Velocity(x,y,z){
 function initLight(x,y) {
     var spotLight = new THREE.PointLight( 0xffffff );
     spotLight.position.set( x, y, 100 );
-
     spotLight.castShadow = true;
     //spotLight.angle=(Math.PI)/3;
-
-    //
     spotLight.shadow.mapSize.width = 1024;
     spotLight.shadow.mapSize.height = 1024;
-    //
     // spotLight.shadow.camera.near = 500;
     // spotLight.shadow.camera.far = 4000;
     //spotLight.shadow.camera.fov = 10;
@@ -125,7 +130,6 @@ function drawCube(dimension, params){
     mesh.position.set(-0,-30,10);
     mesh.castShadow = true;
     return mesh;
-
 }
 
 function drawSphere(radius) {
@@ -135,7 +139,6 @@ function drawSphere(radius) {
     mesh.position.set(-20,0,30);
     mesh.castShadow = true;
     return mesh;
-
 }
 
 function drawToro(rmenor, rmayor) {
@@ -145,7 +148,6 @@ function drawToro(rmenor, rmayor) {
     mesh.position.set(20,0,40);
     mesh.castShadow = true;
     return mesh;
-
 }
 
 function drawOct(radius) {
@@ -155,41 +157,64 @@ function drawOct(radius) {
     mesh.position.set(0,20,50);
     mesh.castShadow = true;
     return mesh;
-
 }
 
 function addMenu(){
-    var color = new THREE.Color( 0x255f00 );
-    var c_white = new THREE.Color( 0xffffff );
-    var texture = new THREE.TextureLoader().load( "img/tablero.png" );
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    gui = new dat.GUI(),
-    folder = gui.addFolder( "Opciones:" ),
-    props = {
-        get 'Tablero'() { return renderer.localClippingEnabled; },
-        set 'Tablero'( v ) {
-                console.log(plane_figure.material);
-                renderer.localClippingEnabled = v;
-                if ( v ) {
-                    plane_figure.material.map = texture;
-                    plane_figure.material.color = c_white;
-                }
-                else {
-                    plane_figure.material.color = color;
-                    plane_figure.material.map = null;
-                };
-            },
 
-    };
-    folder.add( props, 'Tablero' );
-
+    gui = new dat.GUI();
+    addMenuPlane();
     addMenuFigura(cube, "Cubo", cubeParams, cubeV);
     addMenuFigura(toroide, "Toroide", toroParams,toroV);
     addMenuFigura(sphere, "Esfera", sphereParams,sphereV);
     addMenuFigura(octaedro, "Octaedro", octaedroParams,octaedroV);
 }
 
+function addMenuPlane(){
+  var color = new THREE.Color( 0x255f00 );
+  var c_white = new THREE.Color( 0xffffff );
+  var texture = new THREE.TextureLoader().load( "img/tablero.png" );
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+
+  var folder = gui.addFolder( "Opciones:" );
+
+  var textureTablero = folder.add( tableroParam, 'Tablero' ).listen();
+  textureTablero.onChange(function(value){
+     if ( value ) {
+         plane_figure.material.map = texture;
+         plane_figure.material.color = c_white;
+     }
+     else {
+         plane_figure.material.color = color;
+         plane_figure.material.map = null;
+     };
+   });
+
+   var reflexionSombra = folder.add( tableroParam, 'Sombra').listen();
+   reflexionSombra.onChange(function(value){
+     console.log(plane_figure.receiveShadow);
+     if ( value ) {
+       plane_figure.receiveShadow = true;
+     }
+     else {
+       plane_figure.receiveShadow = false;
+     };
+   });
+
+}
+
+function changeTablero(value){
+  console.log(plane_figure.material);
+  renderer.localClippingEnabled = value;
+  if ( value ) {
+      plane_figure.material.map = texture;
+      plane_figure.material.color = c_white;
+  }
+  else {
+      plane_figure.material.color = color;
+      plane_figure.material.map = null;
+  };
+}
 
 function param(posx,posy,posz,colores, velx, vely, velz){
   parameters =
@@ -202,24 +227,7 @@ function param(posx,posy,posz,colores, velx, vely, velz){
 }
 
 function addMenuFigura(obj, nombre, param, vel){
-  /*folder = gui.addFolder( "Figura Geometrica: " + nombre ),
 
-  props = {
-      get 'Velocidad'() { return renderer.localClippingEnabled; },
-      set 'Velocidad'( v ) {
-              renderer.localClippingEnabled = v;
-              if ( v ) {
-                  plane_figure.material.map = texture;
-                  plane_figure.material.color = c_white;
-              }
-              else {
-                  plane_figure.material.color = color;
-                  plane_figure.material.map = null;
-              };
-          },
-
-  };
-  folder.add( props, 'Velocidad' );*/
   obj = obj;
   parameters = param;
   var folder1 = gui.addFolder(nombre);
@@ -231,9 +239,9 @@ function addMenuFigura(obj, nombre, param, vel){
 	objY.onChange(function(value)  {   obj.position.y = value;   });
 	objZ.onChange(function(value) 	{   obj.position.z = value;   });
 
-  var velX = folder1.add( parameters, 'VelocidadX' ).min(0).max(1).step(0.01).listen();
-  var velY = folder1.add( parameters, 'VelocidadY' ).min(0).max(1).step(0.01).listen();
-  var velZ = folder1.add( parameters, 'VelocidadZ' ).min(0).max(1).step(0.01).listen();
+  var velX = folder1.add( parameters, 'VelocidadX' ).min(0).max(0.5).step(0.01).listen();
+  var velY = folder1.add( parameters, 'VelocidadY' ).min(0).max(0.5).step(0.01).listen();
+  var velZ = folder1.add( parameters, 'VelocidadZ' ).min(0).max(0.5).step(0.01).listen();
 
   velX.onChange(function(value) 	{   vel.vx=value;   });
 	velY.onChange(function(value)  {   vel.vy=value; });
