@@ -6,6 +6,7 @@ var camera, cameraControls, scene, renderer;
 var group;
 
 var clock = new THREE.Clock();
+var plane_figure;
 var cube=null;
 var toroide=null;
 var sphere=null;
@@ -49,8 +50,8 @@ function init() {
 
         group = new THREE.Object3D();
 
-        plane_figure = new THREE.Group();
-        plane_figure.visible = false;
+        plane_group = new THREE.Group();
+        plane_group.visible = false;
 
         plane_figure = drawPlane(100,100,0);
 
@@ -70,10 +71,12 @@ function init() {
         octaedro=drawOct(5);
         octaedroV = new Velocity(0,0,0);
 
+
+
         luz1=initLight(20,20);
         addToScene(initLight(20,20));
         addToScene(initLight(-20,-20));
-        luz1.visible=false;
+
         addToScene(plane_figure);
         addToScene(drawPlane(100,100,1));
         addToScene(cube);
@@ -82,6 +85,7 @@ function init() {
         addToScene(octaedro);
 
         addMenu();
+
         window.addEventListener( 'resize', onWindowResize, false );
 
 }
@@ -115,8 +119,6 @@ function drawPlane(width,height,face){
 
     var plane_geometry = new THREE.PlaneGeometry(width,height);
     //var material = new THREE.MeshPhongMaterial({color:0x255f00,side:THREE.DoubleSide});
-
-
     var mesh = new THREE.Mesh(plane_geometry,materials[face]);
     //var object = THREE.SceneUtils.createMultiMaterialObject( plane_geometry, materials );
     mesh.receiveShadow = true;
@@ -162,6 +164,7 @@ function drawOct(radius) {
 function addMenu(){
 
     gui = new dat.GUI();
+
     addMenuPlane();
     addMenuFigura(cube, "Cubo", cubeParams, cubeV);
     addMenuFigura(toroide, "Toroide", toroParams,toroV);
@@ -199,21 +202,19 @@ function addMenuPlane(){
      else {
        plane_figure.receiveShadow = false;
      };
+
    });
 
-}
+   var luz1 = folder.add( tableroParam, 'Luz1').listen();
+   reflexionSombra.onChange(function(value){
 
-function changeTablero(value){
-  console.log(plane_figure.material);
-  renderer.localClippingEnabled = value;
-  if ( value ) {
-      plane_figure.material.map = texture;
-      plane_figure.material.color = c_white;
-  }
-  else {
-      plane_figure.material.color = color;
-      plane_figure.material.map = null;
-  };
+   });
+
+   var luz2 = folder.add( tableroParam, 'Luz2').listen();
+   reflexionSombra.onChange(function(value){
+
+   });
+
 }
 
 function param(posx,posy,posz,colores, velx, vely, velz){
@@ -239,9 +240,9 @@ function addMenuFigura(obj, nombre, param, vel){
 	objY.onChange(function(value)  {   obj.position.y = value;   });
 	objZ.onChange(function(value) 	{   obj.position.z = value;   });
 
-  var velX = folder1.add( parameters, 'VelocidadX' ).min(0).max(0.5).step(0.01).listen();
-  var velY = folder1.add( parameters, 'VelocidadY' ).min(0).max(0.5).step(0.01).listen();
-  var velZ = folder1.add( parameters, 'VelocidadZ' ).min(0).max(0.5).step(0.01).listen();
+  var velZ = folder1.add( parameters, 'VelocidadZ' ).min(0).max(0.2).step(0.01).listen();
+  var velX = folder1.add( parameters, 'VelocidadX' ).min(0).max(0.2).step(0.01).listen();
+  var velY = folder1.add( parameters, 'VelocidadY' ).min(0).max(0.2).step(0.01).listen();
 
   velX.onChange(function(value) 	{   vel.vx=value;   });
 	velY.onChange(function(value)  {   vel.vy=value; });
@@ -283,10 +284,10 @@ function clickObject( e ) {
   vector = vector.unproject(camera);
   var raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
   var intersects = raycaster.intersectObjects([toroide, cube]);
+
   if (intersects.length > 0) {
     console.log(intersects[0]);
-    //intersects[0].object.material.transparent = true;
-    //intersects[0].object.material.opacity = 0.1;
+
     objetoSelect = intersects[0].object;
 
   }
