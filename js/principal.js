@@ -74,8 +74,10 @@ function init() {
 
 
         luz1=initLight(20,20);
-        addToScene(initLight(20,20));
-        addToScene(initLight(-20,-20));
+        luz2=initLight(-20,-20);
+        addToScene(luz1);
+        addToScene(luz2);
+
 
         addToScene(plane_figure);
         addToScene(drawPlane(100,100,1));
@@ -205,14 +207,25 @@ function addMenuPlane(){
 
    });
 
-   var luz1 = folder.add( tableroParam, 'Luz1').listen();
-   reflexionSombra.onChange(function(value){
+   var luz1menu = folder.add( tableroParam, 'Luz1').listen();
+   luz1menu.onChange(function(value){
+     if ( value ) {
+       luz1.visible = true;
+     }
+     else {
+       luz1.visible = false;
+     };
 
    });
 
-   var luz2 = folder.add( tableroParam, 'Luz2').listen();
-   reflexionSombra.onChange(function(value){
-
+   var luz2menu = folder.add( tableroParam, 'Luz2').listen();
+   luz2menu.onChange(function(value){
+     if ( value ) {
+       luz2.visible = true;
+     }
+     else {
+       luz2.visible = false;
+     };
    });
 
 }
