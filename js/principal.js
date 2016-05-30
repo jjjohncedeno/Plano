@@ -13,7 +13,7 @@ var sphere=null;
 var octaedro=null;
 var cubeV, sphereV, octaedroV, toroV;
 var objetoSelect, objetoParametros;
-var gui;
+var gui, guiN, colorN, folderN;
 var luz1, luz2;
 
 var tableroParam = {
@@ -54,7 +54,6 @@ function init() {
         plane_group.visible = false;
 
         plane_figure = drawPlane(100,100,0);
-
         cubeParams = param( -0,-30,10,"#470e98", 0, 0, 0);
         cube = drawCube(10);
         cubeV = new Velocity(0,0,0);
@@ -166,12 +165,14 @@ function drawOct(radius) {
 function addMenu(){
 
     gui = new dat.GUI();
-
+    guiN = new dat.GUI();
+    addMenuFigura(octaedro, "Octaedro", octaedroParams,octaedroV,guiN);
+    guiN.visible=false;
     addMenuPlane();
-    addMenuFigura(cube, "Cubo", cubeParams, cubeV);
-    addMenuFigura(toroide, "Toroide", toroParams,toroV);
-    addMenuFigura(sphere, "Esfera", sphereParams,sphereV);
-    addMenuFigura(octaedro, "Octaedro", octaedroParams,octaedroV);
+    /*addMenuFigura(cube, "Cubo", cubeParams, cubeV, gui);
+    addMenuFigura(toroide, "Toroide", toroParams,toroV,gui);
+    addMenuFigura(sphere, "Esfera", sphereParams,sphereV,gui);
+    addMenuFigura(octaedro, "Octaedro", octaedroParams,octaedroV,gui);*/
 }
 
 function addMenuPlane(){
@@ -197,7 +198,6 @@ function addMenuPlane(){
 
    var reflexionSombra = folder.add( tableroParam, 'Sombra').listen();
    reflexionSombra.onChange(function(value){
-     console.log(plane_figure.receiveShadow);
      if ( value ) {
        plane_figure.receiveShadow = true;
      }
@@ -240,29 +240,29 @@ function param(posx,posy,posz,colores, velx, vely, velz){
   return parameters;
 }
 
-function addMenuFigura(obj, nombre, param, vel){
+function addMenuFigura(obj, nombre, param, vel, guiA){
 
   obj = obj;
   parameters = param;
-  var folder1 = gui.addFolder(nombre);
-	var objX = folder1.add( parameters, 'PosicionX' ).min(-38).max(38).step(1).listen();
-	var objY = folder1.add( parameters, 'PosicionY' ).min(-38).max(38).step(1).listen();
-	var objZ = folder1.add( parameters, 'PosicionZ' ).min(-0).max(40).step(1).listen();
+  folderN = guiA.addFolder(nombre);
+	var objX = folderN.add( parameters, 'PosicionX' ).min(-38).max(38).step(1).listen();
+	var objY = folderN.add( parameters, 'PosicionY' ).min(-38).max(38).step(1).listen();
+	var objZ = folderN.add( parameters, 'PosicionZ' ).min(-0).max(60).step(1).listen();
 
 	objX.onChange(function(value) 	{   obj.position.x = value;   });
 	objY.onChange(function(value)  {   obj.position.y = value;   });
 	objZ.onChange(function(value) 	{   obj.position.z = value;   });
 
-  var velZ = folder1.add( parameters, 'VelocidadZ' ).min(0).max(0.2).step(0.01).listen();
-  var velX = folder1.add( parameters, 'VelocidadX' ).min(0).max(0.2).step(0.01).listen();
-  var velY = folder1.add( parameters, 'VelocidadY' ).min(0).max(0.2).step(0.01).listen();
+  var velZ = folderN.add( parameters, 'VelocidadZ' ).min(0).max(0.2).step(0.01).listen();
+  var velX = folderN.add( parameters, 'VelocidadX' ).min(0).max(0.2).step(0.01).listen();
+  var velY = folderN.add( parameters, 'VelocidadY' ).min(0).max(0.2).step(0.01).listen();
 
   velX.onChange(function(value) 	{   vel.vx=value;   });
 	velY.onChange(function(value)  {   vel.vy=value; });
 	velZ.onChange(function(value) 	{   vel.vz=value;  });
 
-  var objColor = gui.addColor( parameters, 'color' ).name('Color').listen();
-	objColor.onChange(function(value) // onFinishChange
+  colorN = guiA.addColor( parameters, 'color' ).name('Color').listen();
+	colorN.onChange(function(value) // onFinishChange
 	{   obj.material.color.setHex( value.replace("#", "0x") );   });
 
 }
@@ -275,19 +275,19 @@ function addToScene(geom){
 
 function rotate(obj,velx, vely, velz){
 
-    obj.rotateZ(velz);
-    obj.rotateX(velx);
-    obj.rotateY(vely);
+  obj.rotateZ(velz);
+  obj.rotateX(velx);
+  obj.rotateY(vely);
 }
 
 function onWindowResize() {
 
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
 
-        renderer.setSize( window.innerWidth, window.innerHeight );
+  renderer.setSize( window.innerWidth, window.innerHeight );
 
-        renderer.render(scene, camera);
+  renderer.render(scene, camera);
 
 }
 
@@ -296,28 +296,65 @@ function clickObject( e ) {
   var vector = new THREE.Vector3(( e.clientX / window.innerWidth ) * 2 - 1, -( e.clientY / window.innerHeight ) * 2 + 1, 0.5);
   vector = vector.unproject(camera);
   var raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
-  var intersects = raycaster.intersectObjects([toroide, cube]);
+  var intersects = raycaster.intersectObjects([toroide, cube, sphere, octaedro]);
 
   if (intersects.length > 0) {
-    console.log(intersects[0]);
-
+    guiN.destroy();
+    guiN = new dat.GUI();
     objetoSelect = intersects[0].object;
+    console.log(objetoSelect.geometry.type);
+    addMenuFigura(objetoSelect, getName(objetoSelect), getParams(objetoSelect), getRota(objetoSelect), guiN);
+  }
+}
 
+function getName(obj){
+  if (objetoSelect.geometry.type == "BoxGeometry"){
+    return "Cubo";
+  }else if(objetoSelect.geometry.type == "TorusGeometry"){
+    return "Toroide";
+  }else if(objetoSelect.geometry.type == "SphereGeometry"){
+    return "Esfera";
+  }else if(objetoSelect.geometry.type == "OctahedronGeometry"){
+    return "Octaedro";
+  }
+}
+
+function getParams(obj){
+  if (objetoSelect.geometry.type == "BoxGeometry"){
+    return cubeParams;
+  }else if(objetoSelect.geometry.type == "TorusGeometry"){
+    return toroParams;
+  }else if(objetoSelect.geometry.type == "SphereGeometry"){
+    return sphereParams;
+  }else if(objetoSelect.geometry.type == "OctahedronGeometry"){
+    return octaedroParams;
+  }
+}
+
+function getRota(obj){
+  if (objetoSelect.geometry.type == "BoxGeometry"){
+    return cubeV;
+  }else if(objetoSelect.geometry.type == "TorusGeometry"){
+    return toroV;
+  }else if(objetoSelect.geometry.type == "SphereGeometry"){
+    return sphereV;
+  }else if(objetoSelect.geometry.type == "OctahedronGeometry"){
+    return octaedroV;
   }
 }
 
 function animate() {
 
-    var delta = clock.getDelta();
-    rotate(cube,cubeV.vx, cubeV.vy, cubeV.vz)
-    rotate(toroide,toroV.vx, toroV.vy, toroV.vz)
-    rotate(sphere,sphereV.vx, sphereV.vy, sphereV.vz)
-    rotate(octaedro,octaedroV.vx, octaedroV.vy, octaedroV.vz)
+  var delta = clock.getDelta();
+  rotate(cube,cubeV.vx, cubeV.vy, cubeV.vz)
+  rotate(toroide,toroV.vx, toroV.vy, toroV.vz)
+  rotate(sphere,sphereV.vx, sphereV.vy, sphereV.vz)
+  rotate(octaedro,octaedroV.vx, octaedroV.vy, octaedroV.vz)
 
-    requestAnimationFrame(animate);
+  requestAnimationFrame(animate);
 
-    cameraControls.update(delta);
+  cameraControls.update(delta);
 
-    renderer.render(scene, camera);
+  renderer.render(scene, camera);
 
 }
