@@ -15,6 +15,7 @@ var cubeV, sphereV, octaedroV, toroV;
 var objetoSelect, objetoParametros;
 var gui, guiN, colorN, folderN;
 var luz1, luz2;
+var time=Date.now();
 
 var tableroParam = {
   Tablero : true,
@@ -341,6 +342,12 @@ function getRota(obj){
   }else if(objetoSelect.geometry.type == "OctahedronGeometry"){
     return octaedroV;
   }
+}
+
+function rotateOnEje( objeto ){
+  objeto.position.x = Math.cos( time * 0.001 + 10 ) * 30;
+  objeto.position.y = Math.sin( time * 0.001 + 10 ) * 30;
+  objeto.position.z = Math.sin( time * 0.001 + 10 ) * 30;
 }
 
 function animate() {
