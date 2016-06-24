@@ -17,6 +17,16 @@ var gui, guiN, colorN, folderN;
 var luz1, luz2;
 var time=Date.now();
 
+//variables para evento clic
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2(),
+offset = new THREE.Vector3(),
+intersection = new THREE.Vector3(),
+INTERSECTED, SELECTED;
+var controls;
+var objects = [];
+var plane_move = new THREE.Plane();
+
 var tableroParam = {
   Tablero : true,
   Sombra : true,
@@ -88,8 +98,71 @@ function init() {
 
         addMenu();
 
+        // Agregar a objects las figuras
+        objects.push( cube );
+        objects.push( sphere );
+        objects.push( toroide );
+        objects.push( octaedro );
+
+        //Evento clic
+        renderer.domElement.addEventListener( 'mousemove', onDocumentMouseMove, false );
+        renderer.domElement.addEventListener( 'mousedown', onDocumentMouseDown, false );
+        renderer.domElement.addEventListener( 'mouseup', onDocumentMouseUp, false );
+
+
         window.addEventListener( 'resize', onWindowResize, false );
 
+}
+
+// Funciones para mover
+function onDocumentMouseMove( event ) {
+  event.preventDefault();
+  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+  raycaster.setFromCamera( mouse, camera );
+  if ( SELECTED ) {
+    if ( raycaster.ray.intersectPlane( plane_move, intersection ) ) {
+      SELECTED.position.copy( intersection.sub( offset ) );
+    }
+    return;
+  }
+  var intersects = raycaster.intersectObjects( objects );
+  if ( intersects.length > 0 ) {
+    if ( INTERSECTED != intersects[ 0 ].object ) {
+      if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+      INTERSECTED = intersects[ 0 ].object;
+      INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
+      plane_move.setFromNormalAndCoplanarPoint(
+        camera.getWorldDirection( plane_move.normal ),
+        INTERSECTED.position );
+    }
+    container.style.cursor = 'pointer';
+  } else {
+    if ( INTERSECTED ) INTERSECTED.material.color.setHex( INTERSECTED.currentHex );
+    INTERSECTED = null;
+    container.style.cursor = 'auto';
+  }
+}
+function onDocumentMouseDown( event ) {
+  event.preventDefault();
+  raycaster.setFromCamera( mouse, camera );
+  var intersects = raycaster.intersectObjects( objects );
+  if ( intersects.length > 0 ) {
+    cameraControls.enabled = false;
+    SELECTED = intersects[ 0 ].object;
+    if ( raycaster.ray.intersectPlane( plane_move, intersection ) ) {
+      offset.copy( intersection ).sub( SELECTED.position );
+    }
+    container.style.cursor = 'move';
+  }
+}
+function onDocumentMouseUp( event ) {
+  event.preventDefault();
+  cameraControls.enabled = true;
+  if ( INTERSECTED ) {
+    SELECTED = null;
+  }
+  container.style.cursor = 'auto';
 }
 
 function Velocity(x,y,z){
