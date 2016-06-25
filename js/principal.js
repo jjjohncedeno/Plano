@@ -60,31 +60,47 @@ function initSpotLight() {
 }
 
 function drawPlane(width,height){
+    //creamos el elemento geometrico del plano
     var plane_geometry = new THREE.PlaneGeometry(width,height);
+    //creamos el objeto material que usaremos para el plano
+    //usaremos materiales Phong para que este refleje la luz con el metodo de Phong
     var material = new THREE.MeshPhongMaterial({color:0x255f00,side:THREE.DoubleSide});
+    //realizamos el mesh del elemento geometrico con el material
     var mesh = new THREE.Mesh(plane_geometry,material);
+    //habilitamos el plano para que la sombra de los objetos
+    //pueda ser proyectada sobre el
     mesh.receiveShadow = true;
     return mesh;
 }
 
 function drawCube(dimension){
+    //creamos el elemento geometrico del cubo
     var cube_geometry = new THREE.BoxGeometry(dimension,dimension,dimension);
+    //creamos el material utilizado por el cubo
     var material = new THREE.MeshPhongMaterial({color:0x55aaaa,side:THREE.DoubleSide});
+    //hacemos un mesh del elemento geometrico con el material
     var mesh = new THREE.Mesh(cube_geometry,material);
+    //seteamos la posicion del objeto en el espacio coordenado
     mesh.position.set(-0,-30,10);
+    //habilitamos el objeto para que cree la sombra
+    // que se proyecte sobre el plano
     mesh.castShadow = true;
     return mesh;
-
 }
 
 function drawSphere(radius) {
+    //creamos el elemento geometrico de la esfera
     var sphere_geometry = new THREE.SphereGeometry(radius);
+    //creamos el material utilizado por la esfera
     var material = new THREE.MeshPhongMaterial({color:0xea350e,side:THREE.DoubleSide});
+    //hacemos un mesh del elemento geometrico con el material
     var mesh = new THREE.Mesh(sphere_geometry,material);
+    //seteamos la posicion del objeto en el espacio coordenado
     mesh.position.set(-20,0,30);
+    //habilitamos el objeto para que cree la sombra
+    // que se proyecte sobre el plano
     mesh.castShadow = true;
     return mesh;
-
 }
 
 function drawToro(rmenor, rmayor) {
