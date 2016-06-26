@@ -16,6 +16,8 @@ var objetoSelect, objetoParametros;
 var gui, guiN, colorN, folderN;
 var luz1, luz2;
 var time=Date.now();
+var isRotate=false;
+var radioSphere, radioCube, radioOctaedro, radioToro;
 
 //variables para evento clic
 var raycaster = new THREE.Raycaster();
@@ -32,6 +34,7 @@ var tableroParam = {
   Sombra : true,
   Luz1: true,
   Luz2: true,
+  Rotacion: false,
 }
 
 init();
@@ -67,18 +70,23 @@ function init() {
         plane_figure = drawPlane(100,100,0);
         cubeParams = param( -0,-30,10,"#470e98", 0, 0, 0);
         cube = drawCube(10);
+        radioCube = pitagora(cube.position.x, cube.position.y);
         cubeV = new Velocity(0,0,0);
 
         toroParams = param( -0,-30,10,"#c600e1", 0, 0, 0);
         toroide=drawToro(5,1);
+        radioToro = pitagora(toroide.position.x, toroide.position.y);
         toroV = new Velocity(0,0,0);
 
         sphereParams = param( -0,-30,10,"#e10034", 0, 0, 0);
         sphere=drawSphere(5);
+        radioSphere = pitagora(sphere.position.x, sphere.position.y);
         sphereV = new Velocity(0,0,0);
 
         octaedroParams = param( -0,-30,10,"#00e14f", 0, 0, 0);
         octaedro=drawOct(5);
+        radioOctaedro = pitagora(octaedro.position.x, octaedro.position.y);
+        console.log(radioOctaedro)
         octaedroV = new Velocity(0,0,0);
 
 
@@ -112,6 +120,14 @@ function init() {
 
         window.addEventListener( 'resize', onWindowResize, false );
 
+}
+
+function pitagora( x, y ){
+  var res;
+  var mult = x*x+y*y;
+  res= Math.sqrt(mult);
+  console.log(res);
+  return res;
 }
 
 // Funciones para mover
@@ -163,6 +179,10 @@ function onDocumentMouseUp( event ) {
     SELECTED = null;
   }
   container.style.cursor = 'auto';
+  radioChange(sphere);
+  radioChange(octaedro);
+  radioChange(cube);
+  radioChange(toroide);
 }
 
 function Velocity(x,y,z){
@@ -204,10 +224,7 @@ function drawCube(dimension, params){
     var cube_geometry = new THREE.BoxGeometry(dimension,dimension,dimension);
     var material = new THREE.MeshPhongMaterial({color:"#470e98",side:THREE.DoubleSide});
     var mesh = new THREE.Mesh(cube_geometry,material);
-    //seteamos la posicion del objeto en el espacio coordenado
-    mesh.position.set(-0,-30,10);
-    //habilitamos el objeto para que cree la sombra
-    // que se proyecte sobre el plano
+    mesh.position.set(-0,-3,10);
     mesh.castShadow = true;
     return mesh;
 }
@@ -309,6 +326,16 @@ function addMenuPlane(){
      };
    });
 
+   var rotacion = folder.add( tableroParam, 'Rotacion').listen();
+   rotacion.onChange(function(value){
+     if ( value ) {
+       isRotate = true;
+     }
+     else {
+       isRotate = false;
+     };
+   });
+
 }
 
 function param(posx,posy,posz,colores, velx, vely, velz){
@@ -330,8 +357,8 @@ function addMenuFigura(obj, nombre, param, vel, guiA){
 	var objY = folderN.add( parameters, 'PosicionY' ).min(-38).max(38).step(1).listen();
 	var objZ = folderN.add( parameters, 'PosicionZ' ).min(-0).max(60).step(1).listen();
 
-	objX.onChange(function(value) 	{   obj.position.x = value;   });
-	objY.onChange(function(value)  {   obj.position.y = value;   });
+	objX.onChange(function(value) 	{   obj.position.x = value; radioChange(obj);  });
+	objY.onChange(function(value)  {   obj.position.y = value;  radioChange(obj); });
 	objZ.onChange(function(value) 	{   obj.position.z = value;   });
 
   var velZ = folderN.add( parameters, 'VelocidadZ' ).min(0).max(0.2).step(0.01).listen();
@@ -348,7 +375,18 @@ function addMenuFigura(obj, nombre, param, vel, guiA){
 
 }
 
-
+function radioChange(obj){
+  var radio=pitagora(obj.position.x, obj.position.y);
+  if (obj.geometry.type == "BoxGeometry"){
+    radioCube = radio;
+  }else if(obj.geometry.type == "TorusGeometry"){
+    radioToro = radio;
+  }else if(obj.geometry.type == "SphereGeometry"){
+    radioSphere = radio;
+  }else if(obj.geometry.type == "OctahedronGeometry"){
+    radioOctaedro = radio;
+  }
+}
 
 function addToScene(geom){
     scene.add(geom);
@@ -424,10 +462,10 @@ function getRota(obj){
   }
 }
 
-function rotateOnEje( objeto ){
-  objeto.position.x = Math.cos( time * 0.001 + 10 ) * 30;
-  objeto.position.y = Math.sin( time * 0.001 + 10 ) * 30;
-  objeto.position.z = Math.sin( time * 0.001 + 10 ) * 30;
+function rotateOnEje( objeto, radio ){
+  var time=Date.now();
+  objeto.position.x = Math.cos( time * 0.001 + 20 ) * radio;
+  objeto.position.y = Math.sin( time * 0.001 + 20 ) * radio;
 }
 
 function animate() {
@@ -437,6 +475,12 @@ function animate() {
   rotate(toroide,toroV.vx, toroV.vy, toroV.vz)
   rotate(sphere,sphereV.vx, sphereV.vy, sphereV.vz)
   rotate(octaedro,octaedroV.vx, octaedroV.vy, octaedroV.vz)
+  if (isRotate){
+    rotateOnEje( sphere , radioSphere )
+    rotateOnEje( toroide, radioToro )
+    rotateOnEje( cube, radioCube )
+    rotateOnEje( octaedro, radioOctaedro )
+  }
 
   requestAnimationFrame(animate);
 
