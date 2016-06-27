@@ -385,28 +385,29 @@ function addMenuFigura(obj, nombre, param, vel, guiA){
   velY.onChange(function(value)  {   vel.vy=value; });
   velZ.onChange(function(value)   {   vel.vz=value;  });
 
-  
-  var textura_menu = folderN.add( param_texure, "Imagen", [ "Manchas", "Barras diagonales", "Mosaico", "Papel", "Profundidad", "Tablero"] ).name( "Textura" );
+  var c_white = new THREE.Color(0xffffff);
+  var textura_menu = folderN.add( param_texure, "Imagen", [ "Arbol", "Dorado", "Madera", "Mosaico", "Mueble", "Tablero"] ).name( "Textura" );
   textura_menu.onChange(function(value) {
-      if (value == "Manchas") {
-        obj.material.map = THREE.ImageUtils.loadTexture( "img/manchas.png" );
+      if (value == "Arbol") {
+        obj.material.map = THREE.ImageUtils.loadTexture( "img/arbol.png" );
         obj.material.needsUpdate = true;
+        obj.material.color = c_white;
         //obj.material.color = c_white;
       }
-      if (value == "Barras diagonales") {
-        obj.material.map = THREE.ImageUtils.loadTexture( "img/barras diagonales.png" );
+      if (value == "Dorado") {
+        obj.material.map = THREE.ImageUtils.loadTexture( "img/dorado.jpg" );
+        obj.material.needsUpdate = true;
+      }
+      if (value == "Madera") {
+        obj.material.map = THREE.ImageUtils.loadTexture( "img/madera.jpg" );
         obj.material.needsUpdate = true;
       }
       if (value == "Mosaico") {
-        obj.material.map = THREE.ImageUtils.loadTexture( "img/Mosaico.png" );
+        obj.material.map = THREE.ImageUtils.loadTexture( "img/mosaico.jpg" );
         obj.material.needsUpdate = true;
       }
-      if (value == "Papel") {
-        obj.material.map = THREE.ImageUtils.loadTexture( "img/Papel.png" );
-        obj.material.needsUpdate = true;
-      }
-      if (value == "Profundidad") {
-        obj.material.map = THREE.ImageUtils.loadTexture( "img/profundidad.png" );
+      if (value == "Mueble") {
+        obj.material.map = THREE.ImageUtils.loadTexture( "img/mueble.jpg" );
         obj.material.needsUpdate = true;
       }
       if (value == "Tablero") {
