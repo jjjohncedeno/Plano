@@ -29,12 +29,23 @@ var controls;
 var objects = [];
 var plane_move = new THREE.Plane();
 
+//Variables para textuas
+var textureBarraDiag = new THREE.TextureLoader().load( 'img/barras diagonales.png' );
+var textureManchas = new THREE.TextureLoader().load( 'img/manchas.png' );
+var flatBarraDiag = new THREE.MeshPhongMaterial( { map: textureBarraDiag, side: THREE.DoubleSide } );
+var flatManchas = new THREE.MeshPhongMaterial( { map: textureManchas, side: THREE.DoubleSide } );
+
+
 var tableroParam = {
   Tablero : true,
   Sombra : true,
   Luz1: true,
   Luz2: true,
   Rotacion: false,
+}
+
+var param_texure = {
+  Imagen : "Imagen 1"
 }
 
 init();
@@ -368,6 +379,18 @@ function addMenuFigura(obj, nombre, param, vel, guiA){
   velX.onChange(function(value) 	{   vel.vx=value;   });
 	velY.onChange(function(value)  {   vel.vy=value; });
 	velZ.onChange(function(value) 	{   vel.vz=value;  });
+
+  var textura_menu = folderN.add( param_texure, "Imagen", [ "Manchas", "Barras diagonales"] ).name( "Textura" );
+  textura_menu.onChange(function(value) {
+      if (value == "Manchas") {
+        obj.material.map = THREE.ImageUtils.loadTexture( "img/manchas.png" );
+        obj.material.needsUpdate = true;
+        //obj.material.color = c_white;
+      }
+      if (value == "Barras diagonales") {
+        obj.material.map = textureBarraDiag;
+      }
+  });
 
   colorN = guiA.addColor( parameters, 'color' ).name('Color').listen();
 	colorN.onChange(function(value) // onFinishChange
