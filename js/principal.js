@@ -29,13 +29,6 @@ var controls;
 var objects = [];
 var plane_move = new THREE.Plane();
 
-//Variables para textuas
-var textureBarraDiag = new THREE.TextureLoader().load( 'img/barras diagonales.png' );
-var textureManchas = new THREE.TextureLoader().load( 'img/manchas.png' );
-var flatBarraDiag = new THREE.MeshPhongMaterial( { map: textureBarraDiag, side: THREE.DoubleSide } );
-var flatManchas = new THREE.MeshPhongMaterial( { map: textureManchas, side: THREE.DoubleSide } );
-
-
 var tableroParam = {
     Tablero: true,
     Sombra: true,
@@ -45,7 +38,7 @@ var tableroParam = {
 }
 
 var param_texure = {
-  Imagen : "Imagen 1"
+  Imagen : ""
 }
 
 init();
@@ -392,8 +385,8 @@ function addMenuFigura(obj, nombre, param, vel, guiA){
   velY.onChange(function(value)  {   vel.vy=value; });
   velZ.onChange(function(value)   {   vel.vz=value;  });
 
-  var c_white = new THREE.Color( 0xffffff );
-  var textura_menu = folderN.add( param_texure, "Imagen", [ "Manchas", "Barras diagonales"] ).name( "Textura" );
+  
+  var textura_menu = folderN.add( param_texure, "Imagen", [ "Manchas", "Barras diagonales", "Mosaico", "Papel", "Profundidad", "Tablero"] ).name( "Textura" );
   textura_menu.onChange(function(value) {
       if (value == "Manchas") {
         obj.material.map = THREE.ImageUtils.loadTexture( "img/manchas.png" );
@@ -401,13 +394,30 @@ function addMenuFigura(obj, nombre, param, vel, guiA){
         //obj.material.color = c_white;
       }
       if (value == "Barras diagonales") {
-        obj.material.map = textureBarraDiag;
+        obj.material.map = THREE.ImageUtils.loadTexture( "img/barras diagonales.png" );
+        obj.material.needsUpdate = true;
       }
-  })
+      if (value == "Mosaico") {
+        obj.material.map = THREE.ImageUtils.loadTexture( "img/Mosaico.png" );
+        obj.material.needsUpdate = true;
+      }
+      if (value == "Papel") {
+        obj.material.map = THREE.ImageUtils.loadTexture( "img/Papel.png" );
+        obj.material.needsUpdate = true;
+      }
+      if (value == "Profundidad") {
+        obj.material.map = THREE.ImageUtils.loadTexture( "img/profundidad.png" );
+        obj.material.needsUpdate = true;
+      }
+      if (value == "Tablero") {
+        obj.material.map = THREE.ImageUtils.loadTexture( "img/tablero.png" );
+        obj.material.needsUpdate = true;
+      }
+  });
 
   colorN = guiA.addColor( parameters, 'color' ).name('Color').listen();
   colorN.onChange(function(value) // onFinishChange
-  {   obj.material.color.setHex( value.replace("#", "0x") );   });
+  {   obj.material.color.setHex( value.replace("#", "0x") );  obj.material.map = null; obj.material.needsUpdate = true; });
 
 }
 
